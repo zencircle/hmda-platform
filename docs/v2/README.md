@@ -3,11 +3,19 @@
 To build and run the application in Kubernetes (local development), the following steps must be taken:
 
 1. Make sure that [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) is installed and configured for your system
-2. Make sure that [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) is installed and configured. When properly
-installed, you should be able to do `minikube dashboard` to open up the `kubernetes` cluster dashboard in your browser. Make sure that
-`kubectl` is properly configured to point to `minikube` when working in local development mode. `Minikube` should have a minimum of 6 GB of RAM
-to be able to run all the necessary containers for the `HMDA Platform`.
-3. Make sure that [Helm](https://helm.sh/) is installed, as well as Tiller, the server side component.
+2. Make sure that [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) is installed. When working in local development mode. `minikube` should have a sufficient resources to be able to run all the necessary containers for the `HMDA Platform`.
+```
+minikube start --cpus=4 --memory=8192
+```
+Make sure that `kubectl` is properly configured to point to `minikube`.  
+```
+kubect1 config user-context minikube
+```   
+3. Make sure that [Helm](https://helm.sh/) client and as well as Tiller, the server side component is installed
+```
+kubectl create -f https://raw.githubusercontent.com/istio/istio/master/install/kubernetes/helm/helm-service-account.yaml
+helm init --service-account tiller
+```
 4. Add credentials for Cassandra
 
 ```shell
