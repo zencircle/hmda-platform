@@ -16,7 +16,12 @@ kubect1 config user-context minikube
 kubectl create -f https://raw.githubusercontent.com/istio/istio/master/install/kubernetes/helm/helm-service-account.yaml
 helm init --service-account tiller
 ```
-4. Add credentials for Cassandra
+4. Install [Cassandra](https://kubernetes.io/docs/tutorials/stateful-application/cassandra/)
+```
+kubectl apply -f https://k8s.io/examples/application/cassandra/cassandra-service.yaml
+kubectl apply -f https://k8s.io/examples/application/cassandra/cassandra-statefulset.yaml
+```
+Add credentials for Cassandra
 
 ```shell
 kubectl create secret generic cassandra-credentials --from-literal=cassandra.username=<username> --from-literal=cassandra.password=<password>
