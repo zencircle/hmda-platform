@@ -25,8 +25,34 @@ Add credentials for Cassandra
 
 ```shell
 kubectl create secret generic cassandra-credentials --from-literal=cassandra.username=<username> --from-literal=cassandra.password=<password>
+kubectl create secret generic cassandra-credentials --from-literal=cassandra.username=cassandra --from-literal=cassandra.password=cassandra
 ```
 
+HMDA-PLATFORM
+```
+git clone https://github.com/cfpb/hmda-platform/
+cd hmda-platform
+
+If required, sync with a remote Git repository
+git pull origin master
+
+Update the CPU/Memory values (minikube resources are limited)
+grep -A6 resources kubernetes/hmda-platform/templates/deployment.yaml 
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "0.2"
+          requests:
+            memory: "64Mi"
+            cpu: "0.1"
+
+helm upgrade --install --force \
+--namespace=default \
+--values=kubernetes/hmda-platform/values.yaml \
+--set image.tag=latest \
+--set service.name=hmda-platform-api \
+hmda-platform \
+```
 5. Install the `Jenkins` Helm Chart, as follows:
 
 * Create namespace for `Jenkins`: 
@@ -34,38 +60,6 @@ kubectl create secret generic cassandra-credentials --from-literal=cassandra.use
 ```bash
 kubectl apply -f kubernetes/jenkins-namespace.yaml
 ```
-
-* Bind `default` service account to cluster admin role: 
-
-```bash
-kubectl apply -f kubernetes/cluster-admin-rolebinding.yaml
-```
-
-* First, make sure the `Helm` repo is up to date:
-
-```shell
-helm repo update
-```
-
-List Helm Charts installed:
-
-```shell
-helm list
-```
-
-In some cases, this command will fail with a permissions error. In that case, run the following:
-
-```shell
-kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
-```
-
-If the `helm list` command doesn't work (usually with an error of "connection refused"), do the following:
-
-```shell
-kubectl --namespace=kube-system edit deployment/tiller-deploy
-```
-
-And change the `automountServiceAccountToken` to `true`. Save and exit
 
 * Add Ambassador Helm Repository
 
