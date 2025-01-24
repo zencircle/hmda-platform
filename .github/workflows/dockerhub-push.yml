@@ -1,38 +1,38 @@
-name: HMDA Docker Hub Image Push
+name: HMDA Platform CI
 
 on:
-  push:
-    branches:
-      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+env:
+  LOCAL_REGISTRY: ghcr.io/${{ github.repository }}
 
 jobs:
-  push_to_dockerhub:
-    name: Push Docker image to Docker Hub
+  build-image:
     runs-on: ubuntu-latest
-    permissions: write-all
+    container: sbtscala/scala-sbt:eclipse-temurin-11.0.16_1.7.3_2.12.17
     steps:
-      - name: Check out the repo
+      - name: Check out repo
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Build image of HMDA Platform only
+      - name: Build Docker image of HMDA platform
         run: |
-          sbt -batch clean hmda-platform/docker:publishLocal
-        continue-on-error: true
+          env JAVA_OPTS="-Xss256m -Xmx4096m" sbt -d -v "project hmda-platform" dockerPublishLocalSkipTests
+        continue-on-error: false
 
-      - name: Tag Docker image
-        run: docker tag $(docker images --filter=reference="hmda/hmda-platform:latest" --format "{{.ID}}") ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
+      - name: Tag and name Docker image
+        run: docker tag hmda/hmda-platform:latest ${{ env.LOCAL_REGISTRY }}:${{ github.sha }}
 
-      - name: Push image to Docker Hub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
-
-      - name: Check image for CVEs
-        uses: docker/scout-action@v1
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          command: cves
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          docker push ${{ env.LOCAL_REGISTRY }}:${{ github.sha }}
