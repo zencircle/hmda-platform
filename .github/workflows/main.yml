@@ -15,13 +15,22 @@ env:
 jobs:
   build-image:
     runs-on: ubuntu-latest
-    container: sbtscala/scala-sbt:eclipse-temurin-11.0.16_1.7.3_2.12.17
+#    container: sbtscala/scala-sbt:eclipse-temurin-11.0.16_1.7.3_2.12.17
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
         
       - name: Start Docker
         run: sudo service docker start
+ 
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+ 
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@v1
         
       - name: Build Docker image of HMDA platform
         run: |
