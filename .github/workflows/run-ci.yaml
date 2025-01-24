@@ -1,4 +1,4 @@
-ame: HMDA Platform CI
+Name: HMDA Platform CI
 
 on:
   pull_request:
