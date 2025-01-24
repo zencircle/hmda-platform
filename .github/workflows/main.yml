@@ -19,7 +19,10 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
-
+        
+      - name: Start Docker
+        run: sudo service docker start
+        
       - name: Build Docker image of HMDA platform
         run: |
           env JAVA_OPTS="-Xss256m -Xmx4096m" sbt -d -v "project hmda-platform" dockerPublishLocalSkipTests
