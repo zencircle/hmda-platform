@@ -8,6 +8,8 @@ on: workflow_dispatch
 
 permissions:
   pull-requests: write
+  contents: read
+  packages: write  
 
 env:
   LOCAL_REGISTRY: ghcr.io/${{ github.repository }}
